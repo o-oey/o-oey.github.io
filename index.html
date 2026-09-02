@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maldives Sales — Your journey, our passion</title>
+  <meta name="description" content="Maldives Sales curates resorts, private islands and local stays across 20 atolls.">
+  <link rel="icon" href="/assets/logo-mark.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <header class="ms-header" id="site-header"></header>
+  <main id="main">
+    <section class="hero">
+      <div class="hero-media" style="background-image:url('https://images.unsplash.com/photo-1573843981267-be1999ff39cd?auto=format&fit=crop&w=2000&q=70')"></div>
+      <div class="hero-orb"></div>
+      <div class="hero-inner">
+        <p class="kicker">Maldives Sales · 20 atolls</p>
+        <h1>The archipelago, edited for people who actually go.</h1>
+        <p class="lede">Private islands, overwater villas and inhabited atolls — searched, compared and booked by a desk that lives the route from Velana to the last lagoon.</p>
+        <div class="hero-row">
+          <a class="btn btn-primary" href="/explorer.html">Browse stays</a>
+          <a class="btn btn-ghost" href="/concierge.html" style="color:#fff;border-color:rgba(255,255,255,.35)">Talk to concierge</a>
+        </div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="kicker" style="color:var(--tide)">Atolls</p>
+            <h2>Twenty doors into the same ocean.</h2>
+          </div>
+          <a class="btn btn-ghost" href="/atolls.html">All atolls</a>
+        </div>
+        <div class="grid grid-4" id="homeAtolls"></div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <p class="kicker" style="color:var(--tide)">Ultra</p>
+            <h2>The names people fly for.</h2>
+          </div>
+          <a class="btn btn-ghost" href="/explorer.html?tier=Ultra%20Luxury">Ultra only</a>
+        </div>
+        <div class="grid grid-3" id="homeUltra"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="ms-footer" id="site-footer"></footer>
+  <script src="/js/catalog.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    MS.header('home'); MS.footer();
+    (async () => {
+      const [stats, atolls, ultra] = await Promise.all([
+        MS.api('/api/stats'),
+        MS.api('/api/atolls'),
+        MS.api('/api/properties?tier=Ultra%20Luxury&limit=6'),
+      ]);
+      document.getElementById('heroStats').innerHTML = [
+        [stats.properties, 'Stays'],
+        [stats.atolls, 'Atolls'],
+        [stats.islands, 'Islands'],
+        [stats.ultra, 'Ultra villas'],
+      ].map(([n,l]) => `<div class="hero-stat"><b>${n.toLocaleString()}</b><span>${l}</span></div>`).join('');
+      const featured = ['B','N','K','AA','Dh','S','Gn','L'];
+      document.getElementById('homeAtolls').innerHTML = atolls
+        .filter(a => featured.includes(a.code))
+        .map(a => `<a class="card atoll-card" href="/atoll.html?code=${a.code}">
+          <div class="card-media" style="background:linear-gradient(160deg,#7edceb,#0c4452)"></div>
+          <div class="card-body"><p class="kicker">${a.code}</p><h3>${a.name}</h3><p class="meta">${a.highlight} · ${a.properties} stays</p></div>
+        </a>`).join('');
+      document.getElementById('homeUltra').innerHTML = ultra.items.map(MS.card).join('');
+    })();
+  </script>
+</body>
+</html>
