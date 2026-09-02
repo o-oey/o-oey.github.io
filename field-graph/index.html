@@ -6,16 +6,64 @@
   <meta name="description" content="Interactive 2D and 3D function grapher with zoom, orbit, and live readouts." />
   <meta name="theme-color" content="#efe8d8" />
   <title>Field Graph</title>
-  <link rel="stylesheet" href="./app.css" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: #efe8d8; color: #1c1914; font-family: ui-sans-serif, system-ui, sans-serif; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    header {
+      flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 12px 18px; border-bottom: 1px solid #d9d0bf;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    .meta { color: #6f685c; font-size: 12px; }
+    .modes { display: flex; gap: 6px; }
+    .modes button {
+      border: 1px solid #d9d0bf; background: #fff; border-radius: 999px;
+      padding: 6px 12px; cursor: pointer; font-size: 12px;
+    }
+    .modes button.on { background: #1c1914; color: #f7f1e4; border-color: #1c1914; }
+    .stage { position: relative; flex: 1 1 auto; min-height: 70vh; }
+    canvas { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; background: #f7f1e4; }
+    canvas.drag { cursor: grabbing; }
+    .readout {
+      position: absolute; left: 16px; bottom: 16px; z-index: 2;
+      font: 12px/1.45 ui-monospace, monospace; background: rgba(255,251,243,.94);
+      border: 1px solid #d9d0bf; border-radius: 12px; padding: 10px 12px; min-width: 220px;
+    }
+    .readout .k { color: #6f685c; }
+    .dock {
+      position: absolute; top: 14px; right: 14px; z-index: 2;
+      width: min(360px, calc(100vw - 24px)); background: rgba(255,251,243,.94);
+      border: 1px solid #d9d0bf; border-radius: 16px; padding: 12px;
+    }
+    .fn input {
+      width: 100%; border: 1px solid #d9d0bf; border-radius: 9px; background: #fff;
+      padding: 8px 9px; font: 12.5px ui-monospace, monospace; color: #1c1914;
+    }
+    .fn input.bad { border-color: #9b2c22; background: #fff3f0; }
+    .chips, .tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .chips button, .tools button {
+      border: 1px solid #d9d0bf; background: #fff; color: #1c1914;
+      border-radius: 999px; padding: 5px 10px; font-size: 11px; cursor: pointer;
+    }
+    .err { min-height: 16px; margin-top: 8px; color: #9b2c22; font: 11px/1.4 ui-monospace, monospace; }
+    .hint { margin-top: 6px; color: #6f685c; font-size: 11px; line-height: 1.45; }
+    label.row { display: flex; justify-content: space-between; font-size: 11px; margin-top: 8px; color: #6f685c; }
+    input[type=range] { width: 100%; accent-color: #b43328; }
+    @media (max-width: 760px) {
+      .stage { min-height: 55vh; }
+      .dock { position: static; width: auto; border-radius: 0; }
+    }
+  </style>
 </head>
 <body>
   <header>
     <h1>Field Graph</h1>
     <div class="modes">
-      <button type="button" id="mode2" class="on">2D y = f(x)</button>
-      <button type="button" id="mode3">3D z = f(x, y)</button>
+      <button type="button" id="mode2">2D y = f(x)</button>
+      <button type="button" id="mode3" class="on">3D z = f(x, y)</button>
     </div>
-    <div class="meta" id="hintbar">scroll zoom · drag pan</div>
+    <div class="meta" id="hintbar">drag orbit · scroll zoom</div>
   </header>
   <div class="stage" id="stage">
     <canvas id="g"></canvas>
@@ -31,10 +79,367 @@
         <button type="button" id="home">reset view</button>
       </div>
       <div class="err" id="err"></div>
-      <div class="hint" id="help">Drag to orbit · scroll to zoom · height is colored from low (teal) to high (rust).</div>
+      <div class="hint" id="help">z = f(x, y). Drag to orbit, scroll to zoom. Height colors run teal → rust.</div>
     </aside>
   </div>
-  <script src="./app-a.js"></script>
-  <script src="./app-b.js"></script>
+  <script>
+    (function () {
+      const canvas = document.getElementById("g");
+      const stage = document.getElementById("stage");
+      const ctx = canvas.getContext("2d");
+      const out = document.getElementById("out");
+      const errEl = document.getElementById("err");
+      const exprEl = document.getElementById("expr");
+      const resEl = document.getElementById("res");
+      const domEl = document.getElementById("dom");
+      const view2 = { cx: 0, cy: 0, scale: 46 };
+      const view3 = { yaw: 0.7, pitch: 0.55, zoom: 1, zScale: 1 };
+      let mode = "3d";
+      let cssW = 800, cssH = 500;
+      let fn2 = null, fn3 = null;
+      let mesh = [];
+      let dragging = false, lx = 0, ly = 0;
+
+      const EX2 = [
+        ["sine", "sin(x)"],
+        ["parabola", "0.12*x^2-2"],
+        ["damped", "sin(3*x)*exp(-0.18*abs(x))"],
+        ["rational", "x/(1+x^2)"]
+      ];
+      const EX3 = [
+        ["wave", "sin(x)*cos(y)"],
+        ["paraboloid", "0.15*(x^2+y^2)"],
+        ["saddle", "0.18*(x^2-y^2)"],
+        ["ripple", "sin(sqrt(x^2+y^2)*2)"],
+        ["gaussian", "2*exp(-(x^2+y^2)/4)"],
+        ["sombrero", "sin(sqrt(x^2+y^2)*3)/(sqrt(x^2+y^2)+0.35)"]
+      ];
+      const ALLOWED = /^(sin|cos|tan|asin|acos|atan|abs|sqrt|log|ln|exp|min|max|floor|ceil|round|pi|e|x|y)$/i;
+
+      function preprocess(expr, vars) {
+        var s = String(expr).trim().replace(/\s+/g, "");
+        if (!s) throw new Error("empty expression");
+        if (!/^[0-9A-Za-z+\-*/^().,]+$/.test(s)) throw new Error("unsupported characters");
+        s = s.replace(/\^/g, "**");
+        s = s.replace(/(\d)(x|y|pi|e|[A-Za-z]+)/gi, "$1*$2");
+        s = s.replace(/(x|y|pi|e|\))(\(|x|y|pi|e|[A-Za-z])/gi, "$1*$2");
+        s = s.replace(/([A-Za-z]+)/g, function (w) {
+          if (!ALLOWED.test(w)) throw new Error("unknown name: " + w);
+          if ((w.toLowerCase() === "y") && vars.indexOf("y") < 0) throw new Error("y is only valid in 3D");
+          return w.toLowerCase();
+        });
+        return s;
+      }
+
+      function compile(expr, dim) {
+        var src = preprocess(expr, dim === 3 ? ["x", "y"] : ["x"]);
+        var raw = new Function(
+          "X", "Y",
+          "var sin=Math.sin,cos=Math.cos,tan=Math.tan,asin=Math.asin,acos=Math.acos,atan=Math.atan,abs=Math.abs,sqrt=Math.sqrt,log=Math.log,ln=Math.log,exp=Math.exp,min=Math.min,max=Math.max,floor=Math.floor,ceil=Math.ceil,round=Math.round,pi=Math.PI,e=Math.E,x=X,y=Y; return (" + src + ");"
+        );
+        raw(0.3, 0.2);
+        return function (x, y) {
+          try {
+            var z = raw(x, y == null ? 0 : y);
+            return typeof z === "number" && isFinite(z) ? z : NaN;
+          } catch (e) { return NaN; }
+        };
+      }
+
+      function rebuild() {
+        errEl.textContent = "";
+        exprEl.classList.remove("bad");
+        try {
+          if (mode === "3d") {
+            fn3 = compile(exprEl.value, 3);
+            buildMesh();
+          } else {
+            fn2 = compile(exprEl.value, 2);
+          }
+        } catch (e) {
+          fn2 = fn3 = null;
+          exprEl.classList.add("bad");
+          errEl.textContent = e.message;
+        }
+        draw();
+      }
+
+      function buildMesh() {
+        mesh = [];
+        if (!fn3) return;
+        var n = Number(resEl.value);
+        var R = Number(domEl.value);
+        var i, j, x, y, z, row;
+        for (j = 0; j <= n; j++) {
+          row = [];
+          y = -R + (2 * R * j) / n;
+          for (i = 0; i <= n; i++) {
+            x = -R + (2 * R * i) / n;
+            z = fn3(x, y);
+            row.push({ x: x, y: y, z: isFinite(z) ? z : null });
+          }
+          mesh.push(row);
+        }
+      }
+
+      function size() {
+        var box = stage.getBoundingClientRect();
+        cssW = Math.max(320, Math.floor(box.width || window.innerWidth));
+        cssH = Math.max(280, Math.floor(box.height || window.innerHeight - 70));
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(cssW * dpr);
+        canvas.height = Math.floor(cssH * dpr);
+        canvas.style.width = cssW + "px";
+        canvas.style.height = cssH + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        draw();
+      }
+
+      function project3(p) {
+        var cy = Math.cos(view3.yaw), sy = Math.sin(view3.yaw);
+        var cp = Math.cos(view3.pitch), sp = Math.sin(view3.pitch);
+        var x = p.x * cy - p.y * sy;
+        var z = p.x * sy + p.y * cy;
+        var y = p.z * view3.zScale * cp - z * sp;
+        var depth = p.z * view3.zScale * sp + z * cp;
+        var s = Math.min(cssW, cssH) * 0.09 * view3.zoom;
+        return {
+          x: cssW * 0.48 + x * s,
+          y: cssH * 0.54 - y * s,
+          d: depth
+        };
+      }
+
+      function lerpColor(t) {
+        t = Math.max(0, Math.min(1, t));
+        var a = [30, 109, 134], b = [180, 51, 40];
+        var r = Math.round(a[0] + (b[0] - a[0]) * t);
+        var g = Math.round(a[1] + (b[1] - a[1]) * t);
+        var bl = Math.round(a[2] + (b[2] - a[2]) * t);
+        return "rgb(" + r + "," + g + "," + bl + ")";
+      }
+
+      function draw3() {
+        ctx.fillStyle = "#f7f1e4";
+        ctx.fillRect(0, 0, cssW, cssH);
+        var R = Number(domEl.value);
+        var axes = [
+          [{ x: -R, y: 0, z: 0 }, { x: R, y: 0, z: 0 }, "#8a4d1c", "x"],
+          [{ x: 0, y: -R, z: 0 }, { x: 0, y: R, z: 0 }, "#2c7a48", "y"],
+          [{ x: 0, y: 0, z: -R * 0.6 }, { x: 0, y: 0, z: R * 0.6 }, "#1e6d86", "z"]
+        ];
+        axes.forEach(function (ax) {
+          var a = project3(ax[0]), b = project3(ax[1]);
+          ctx.strokeStyle = ax[2];
+          ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.fillStyle = ax[2];
+          ctx.font = "12px ui-sans-serif, sans-serif";
+          ctx.fillText(ax[3], b.x + 6, b.y);
+        });
+        if (!mesh.length) return;
+        var zmin = Infinity, zmax = -Infinity, i, j, a, b, c, d, quads = [];
+        for (j = 0; j < mesh.length; j++) {
+          for (i = 0; i < mesh[j].length; i++) {
+            if (mesh[j][i].z != null) {
+              if (mesh[j][i].z < zmin) zmin = mesh[j][i].z;
+              if (mesh[j][i].z > zmax) zmax = mesh[j][i].z;
+            }
+          }
+        }
+        if (!isFinite(zmin)) return;
+        if (zmax === zmin) { zmax = zmin + 1; }
+        view3.zScale = (2 * R) / Math.max(2, (zmax - zmin));
+        for (j = 0; j < mesh.length - 1; j++) {
+          for (i = 0; i < mesh[j].length - 1; i++) {
+            a = mesh[j][i]; b = mesh[j][i + 1]; c = mesh[j + 1][i + 1]; d = mesh[j + 1][i];
+            if (a.z == null || b.z == null || c.z == null || d.z == null) continue;
+            var avg = (a.z + b.z + c.z + d.z) / 4;
+            var pa = project3(a), pb = project3(b), pc = project3(c), pd = project3(d);
+            quads.push({
+              pts: [pa, pb, pc, pd],
+              d: (pa.d + pb.d + pc.d + pd.d) / 4,
+              t: (avg - zmin) / (zmax - zmin)
+            });
+          }
+        }
+        quads.sort(function (u, v) { return u.d - v.d; });
+        quads.forEach(function (q) {
+          ctx.beginPath();
+          ctx.moveTo(q.pts[0].x, q.pts[0].y);
+          ctx.lineTo(q.pts[1].x, q.pts[1].y);
+          ctx.lineTo(q.pts[2].x, q.pts[2].y);
+          ctx.lineTo(q.pts[3].x, q.pts[3].y);
+          ctx.closePath();
+          ctx.fillStyle = lerpColor(q.t);
+          ctx.globalAlpha = 0.92;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.strokeStyle = "rgba(28,25,20,.18)";
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        });
+        out.innerHTML = '<div><span class="k">z</span> ' + exprEl.value +
+          '</div><div><span class="k">range</span> ' + zmin.toFixed(2) + " … " + zmax.toFixed(2) + "</div>";
+      }
+
+      function tick(raw) {
+        raw = Math.max(raw, 1e-6);
+        var p = Math.pow(10, Math.floor(Math.log10(raw)));
+        var f = raw / p;
+        return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
+      }
+      function toWorld(px, py) {
+        return { x: view2.cx + (px - cssW / 2) / view2.scale, y: view2.cy - (py - cssH / 2) / view2.scale };
+      }
+      function toPx(x, y) {
+        return { x: cssW / 2 + (x - view2.cx) * view2.scale, y: cssH / 2 - (y - view2.cy) * view2.scale };
+      }
+      function fmt(n) {
+        if (!isFinite(n)) return "undefined";
+        var a = Math.abs(n);
+        if (a !== 0 && (a >= 1e4 || a < 1e-3)) return n.toExponential(3);
+        return String(Math.round(n * 1000) / 1000);
+      }
+
+      function draw2() {
+        ctx.fillStyle = "#f7f1e4";
+        ctx.fillRect(0, 0, cssW, cssH);
+        var step = tick(88 / view2.scale);
+        var a = toWorld(0, 0), b = toWorld(cssW, cssH);
+        var x0 = Math.floor(a.x / step) * step;
+        var y0 = Math.floor(b.y / step) * step;
+        ctx.font = "11px ui-monospace, monospace";
+        ctx.textBaseline = "top";
+        var x, y, p;
+        for (x = x0; x <= b.x + step; x += step) {
+          p = toPx(x, 0);
+          ctx.strokeStyle = Math.abs(x) < step * 1e-9 ? "#1c1914" : "#e4dccb";
+          ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, cssH); ctx.stroke();
+        }
+        for (y = y0; y <= a.y + step; y += step) {
+          p = toPx(0, y);
+          ctx.strokeStyle = Math.abs(y) < step * 1e-9 ? "#1c1914" : "#e4dccb";
+          ctx.beginPath(); ctx.moveTo(0, p.y); ctx.lineTo(cssW, p.y); ctx.stroke();
+        }
+        if (!fn2) return;
+        ctx.beginPath();
+        ctx.strokeStyle = "#b43328";
+        ctx.lineWidth = 2.1;
+        var pen = false, prev = NaN;
+        for (var i = 0; i <= cssW; i++) {
+          var xv = toWorld(i, 0).x;
+          var yv = fn2(xv);
+          if (!isFinite(yv) || (isFinite(prev) && Math.abs(yv - prev) * view2.scale > cssH * 0.65)) {
+            pen = false; prev = yv; continue;
+          }
+          p = toPx(xv, yv);
+          if (!pen) { ctx.moveTo(p.x, p.y); pen = true; }
+          else ctx.lineTo(p.x, p.y);
+          prev = yv;
+        }
+        ctx.stroke();
+        out.innerHTML = '<div><span class="k">y</span> ' + exprEl.value + "</div>";
+      }
+
+      function draw() {
+        if (mode === "3d") draw3();
+        else draw2();
+      }
+
+      function setMode(next) {
+        mode = next;
+        document.getElementById("mode2").classList.toggle("on", mode === "2d");
+        document.getElementById("mode3").classList.toggle("on", mode === "3d");
+        document.getElementById("hintbar").textContent = mode === "3d" ? "drag orbit · scroll zoom" : "scroll zoom · drag pan";
+        document.getElementById("help").textContent = mode === "3d"
+          ? "z = f(x, y). Drag to orbit, scroll to zoom. Height colors run teal → rust."
+          : "y = f(x). Scroll to zoom, drag to pan.";
+        fillExamples();
+        if (mode === "3d" && exprEl.value.indexOf("y") < 0) exprEl.value = "sin(x)*cos(y)";
+        if (mode === "2d" && exprEl.value.indexOf("y") >= 0) exprEl.value = "sin(x)";
+        rebuild();
+      }
+
+      function fillExamples() {
+        var box = document.getElementById("ex");
+        box.innerHTML = "";
+        (mode === "3d" ? EX3 : EX2).forEach(function (pair) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.textContent = pair[0];
+          b.onclick = function () { exprEl.value = pair[1]; rebuild(); };
+          box.appendChild(b);
+        });
+      }
+
+      exprEl.addEventListener("input", rebuild);
+      resEl.addEventListener("input", function () {
+        document.getElementById("resVal").textContent = resEl.value;
+        if (mode === "3d") { buildMesh(); draw(); }
+      });
+      domEl.addEventListener("input", function () {
+        document.getElementById("domVal").textContent = "±" + domEl.value;
+        if (mode === "3d") { buildMesh(); draw(); }
+      });
+      document.getElementById("home").onclick = function () {
+        view2.cx = 0; view2.cy = 0; view2.scale = 46;
+        view3.yaw = 0.7; view3.pitch = 0.55; view3.zoom = 1;
+        draw();
+      };
+      document.getElementById("mode2").onclick = function () { setMode("2d"); };
+      document.getElementById("mode3").onclick = function () { setMode("3d"); };
+
+      canvas.addEventListener("pointerdown", function (e) {
+        dragging = true; lx = e.clientX; ly = e.clientY;
+        canvas.classList.add("drag");
+        canvas.setPointerCapture(e.pointerId);
+      });
+      canvas.addEventListener("pointerup", function () { dragging = false; canvas.classList.remove("drag"); });
+      canvas.addEventListener("pointercancel", function () { dragging = false; canvas.classList.remove("drag"); });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!dragging) {
+          if (mode === "2d" && fn2) {
+            var rect = canvas.getBoundingClientRect();
+            var mx = e.clientX - rect.left;
+            var wpt = toWorld(mx, 0);
+            out.innerHTML = '<div><span class="k">x</span> ' + fmt(wpt.x) +
+              '</div><div><span class="k">y</span> ' + fmt(fn2(wpt.x)) + "</div>";
+          }
+          return;
+        }
+        var dx = e.clientX - lx, dy = e.clientY - ly;
+        lx = e.clientX; ly = e.clientY;
+        if (mode === "3d") {
+          view3.yaw += dx * 0.008;
+          view3.pitch = Math.max(0.12, Math.min(1.35, view3.pitch + dy * 0.008));
+        } else {
+          view2.cx -= dx / view2.scale;
+          view2.cy += dy / view2.scale;
+        }
+        draw();
+      });
+      canvas.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        if (mode === "3d") {
+          view3.zoom = Math.max(0.35, Math.min(3.2, view3.zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08)));
+        } else {
+          var rect = canvas.getBoundingClientRect();
+          var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+          var before = toWorld(mx, my);
+          view2.scale = Math.min(480, Math.max(6, view2.scale * (e.deltaY < 0 ? 1.12 : 1 / 1.12)));
+          var after = toWorld(mx, my);
+          view2.cx += before.x - after.x;
+          view2.cy += before.y - after.y;
+        }
+        draw();
+      }, { passive: false });
+
+      window.addEventListener("resize", size);
+      fillExamples();
+      setMode("3d");
+      size();
+    })();
+  </script>
 </body>
 </html>
