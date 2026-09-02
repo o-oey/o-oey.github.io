@@ -4,46 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Maldives Sales — Your journey, our passion</title>
-  <meta name="description" content="Maldives Sales curates resorts, private islands and local stays across 20 atolls.">
-  <link rel="icon" href="/assets/logo-mark.svg">
+  <meta name="description" content="Maldives Sales curates resorts, private islands and local stays across 20 atolls. Concierge booking desk with a production-ready backend.">
+  <link rel="icon" href="/assets/logo-official.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/logo-mark.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/landing.css">
 </head>
-<body>
+<body class="landing">
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="scroll-progress" id="scrollProgress"></div>
   <header class="ms-header" id="site-header"></header>
+
   <main id="main">
-    <section class="hero">
-      <div class="hero-media" style="background-image:url('https://images.unsplash.com/photo-1573843981267-be1999ff39cd?auto=format&fit=crop&w=2000&q=70')"></div>
-      <div class="hero-orb"></div>
-      <div class="hero-inner">
-        <p class="kicker">Maldives Sales · 20 atolls</p>
-        <h1>The archipelago, edited for people who actually go.</h1>
-        <p class="lede">Private islands, overwater villas and inhabited atolls — searched, compared and booked by a desk that lives the route from Velana to the last lagoon.</p>
-        <div class="hero-row">
-          <a class="btn btn-primary" href="/explorer.html">Browse stays</a>
-          <a class="btn btn-ghost" href="/concierge.html" style="color:#fff;border-color:rgba(255,255,255,.35)">Talk to concierge</a>
+    <section class="scene-hero" aria-label="Maldives Sales">
+      <div class="scene-sticky">
+        <div class="scene-stage">
+          <div class="layer layer-sky"></div>
+          <div class="layer layer-photo"></div>
+          <div class="layer layer-water"></div>
+          <div class="logo-coin" aria-hidden="true">
+            <img src="/assets/logo-official.svg" alt="" onerror="this.src='/assets/logo-mark.svg'">
+          </div>
+          <div class="hero-copy">
+            <div class="brand-lockup">
+              <img src="/assets/logo-official.svg" alt="Maldives Sales" onerror="this.src='/assets/logo-mark.svg'">
+              <p class="kicker">Your journey, our passion</p>
+            </div>
+            <h1>Descend into the atolls.</h1>
+            <p class="lede">A living catalogue of private islands, overwater villas and inhabited reefs — searched, compared and booked by a desk that flies the same route you do.</p>
+            <div class="hero-row">
+              <a class="btn btn-primary" href="/explorer.html">Browse 1,300+ stays</a>
+              <a class="btn btn-ghost" href="/concierge.html" style="color:#fff;border-color:rgba(255,255,255,.35)">Talk to concierge</a>
+            </div>
+            <div class="hero-stats" id="heroStats"></div>
+          </div>
         </div>
-        <div class="hero-stats" id="heroStats"></div>
+        <div class="scroll-cue">Scroll to enter<div class="wheel"></div></div>
       </div>
     </section>
-    <section class="section">
+
+    <section class="orbit-block" aria-label="Twenty atolls">
+      <div class="orbit-sticky">
+        <div class="orbit-bg"></div>
+        <div class="orbit-ring" id="orbitRing"></div>
+        <div class="orbit-copy">
+          <p class="kicker">20 atolls · 326 islands</p>
+          <h2>A ring of lagoons<br>you can actually book.</h2>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="wrap story-grid">
+        <div class="reveal">
+          <p class="kicker" style="color:var(--tide)">The official mark</p>
+          <h2 style="font-family:var(--serif);font-weight:360;font-size:clamp(2.2rem,4.6vw,3.8rem);letter-spacing:-.03em;line-height:1.05;margin:10px 0 16px">Maldives Sales is the name on the desk.</h2>
+          <p class="muted" style="max-width:48ch;font-size:17px;line-height:1.55">The circular MS crest — lagoon, palms, seaplane — is the official logo of the platform. Every stay, inquiry and transfer sits under that mark.</p>
+          <div class="hero-row" style="margin-top:22px">
+            <a class="btn btn-primary" href="/atolls.html">Open the atolls</a>
+            <a class="btn btn-ghost" href="/collections.html">Collections</a>
+          </div>
+        </div>
+        <div class="story-visual reveal">
+          <div class="story-plate" style="background-image:url('/assets/logo-official.svg');background-size:cover"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section" style="padding-top:20px">
       <div class="wrap">
-        <div class="section-head">
+        <div class="section-head reveal">
           <div>
             <p class="kicker" style="color:var(--tide)">Atolls</p>
-            <h2>Twenty doors into the same ocean.</h2>
+            <h2>Eight doors to start.</h2>
           </div>
-          <a class="btn btn-ghost" href="/atolls.html">All atolls</a>
+          <a class="btn btn-ghost" href="/atolls.html">All twenty</a>
         </div>
         <div class="grid grid-4" id="homeAtolls"></div>
       </div>
     </section>
-    <section class="section">
+
+    <section class="landing-section dark">
       <div class="wrap">
-        <div class="section-head">
+        <div class="feature-band reveal" style="background:transparent;padding:0">
+          <p class="kicker">Why the desk exists</p>
+          <h2 style="font-family:var(--serif);font-weight:360;font-size:clamp(2rem,4vw,3.2rem);margin:10px 0 14px;max-width:18ch">Rates, transfers and a human who answers.</h2>
+          <p style="max-width:54ch;opacity:.86">Scroll the archipelago, tilt the cards, send the brief. Maldives Sales keeps the catalogue, the inquiry ledger and the partner desk in one place.</p>
+          <div class="hero-row" style="margin-top:22px">
+            <a class="btn btn-gold" href="/collections.html">Open collections</a>
+            <a class="btn btn-ghost" href="/concierge.html" style="color:#fff;border-color:rgba(255,255,255,.3)">Write the desk</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="wrap">
+        <div class="section-head reveal">
           <div>
-            <p class="kicker" style="color:var(--tide)">Ultra</p>
+            <p class="kicker" style="color:var(--tide)">Ultra &amp; loved</p>
             <h2>The names people fly for.</h2>
           </div>
           <a class="btn btn-ghost" href="/explorer.html?tier=Ultra%20Luxury">Ultra only</a>
@@ -52,11 +113,23 @@
       </div>
     </section>
   </main>
+
   <footer class="ms-footer" id="site-footer"></footer>
   <script src="/js/catalog.js"></script>
   <script src="/js/app.js"></script>
+  <script src="/js/landing.js"></script>
   <script>
     MS.header('home'); MS.footer();
+    const ORBIT_PHOTOS = [
+      'https://images.unsplash.com/photo-1573843981267-be1999ff39cd?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1586500036706-41963de24d8b?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1559628233-100c798642d4?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=800&q=60',
+      'https://images.unsplash.com/photo-1540202404-a2f127c5b78b?auto=format&fit=crop&w=800&q=60',
+    ];
     (async () => {
       const [stats, atolls, ultra] = await Promise.all([
         MS.api('/api/stats'),
@@ -69,14 +142,39 @@
         [stats.islands, 'Islands'],
         [stats.ultra, 'Ultra villas'],
       ].map(([n,l]) => `<div class="hero-stat"><b>${n.toLocaleString()}</b><span>${l}</span></div>`).join('');
+
       const featured = ['B','N','K','AA','Dh','S','Gn','L'];
-      document.getElementById('homeAtolls').innerHTML = atolls
-        .filter(a => featured.includes(a.code))
-        .map(a => `<a class="card atoll-card" href="/atoll.html?code=${a.code}">
-          <div class="card-media" style="background:linear-gradient(160deg,#7edceb,#0c4452)"></div>
-          <div class="card-body"><p class="kicker">${a.code}</p><h3>${a.name}</h3><p class="meta">${a.highlight} · ${a.properties} stays</p></div>
+      const picked = atolls.filter(a => featured.includes(a.code));
+      document.getElementById('orbitRing').innerHTML = picked.map((a, i) => `
+        <a class="orbit-card" href="/atoll.html?code=${a.code}">
+          <img class="media" src="${ORBIT_PHOTOS[i % ORBIT_PHOTOS.length]}" alt="">
+          <div class="cap"><span>${a.code}</span><b>${a.name}</b></div>
         </a>`).join('');
-      document.getElementById('homeUltra').innerHTML = ultra.items.map(MS.card).join('');
+
+      document.getElementById('homeAtolls').innerHTML = picked.map((a, i) => `
+        <a class="card atoll-card tilt-card reveal" href="/atoll.html?code=${a.code}">
+          <div class="card-media" style="background-image:url('${ORBIT_PHOTOS[i % ORBIT_PHOTOS.length]}');background-size:cover"></div>
+          <div class="card-body">
+            <p class="kicker">${a.code}</p>
+            <h3>${a.name}</h3>
+            <p class="meta">${a.highlight} · ${a.properties} stays</p>
+          </div>
+        </a>`).join('');
+
+      document.getElementById('homeUltra').innerHTML = (ultra.items || []).map((p) => {
+        const html = MS.card(p);
+        return html.replace('class="card"', 'class="card tilt-card reveal"');
+      }).join('');
+
+      document.querySelectorAll('.reveal').forEach((el) => {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((en) => { if (en.isIntersecting) en.target.classList.add('in'); });
+        }, { threshold: 0.12 });
+        io.observe(el);
+      });
+      window.MSLanding?.bindTilt();
+      window.MSLanding?.refresh();
+      window.dispatchEvent(new Event('resize'));
     })();
   </script>
 </body>
