@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" role="img" aria-label="Maldives Sales">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c5eef6"/>
+      <stop offset=".45" stop-color="#7edceb"/>
+      <stop offset="1" stop-color="#1289a3"/>
+    </linearGradient>
+  </defs>
+  <circle cx="75" cy="75" r="72" fill="#0a3d4a"/>
+  <circle cx="75" cy="75" r="66" fill="url(#sky)"/>
+  <path d="M18 78c18-8 28-6 40 2 10 7 22 7 34 0 14-8 26-9 40-2" fill="none" stroke="#e8f7fb" stroke-width="3"/>
+  <path d="M22 88c16-6 26-5 36 2 12 8 22 7 34 0 14-8 24-8 36-1" fill="none" stroke="#ffffff" stroke-opacity=".55" stroke-width="2"/>
+  <text x="75" y="78" text-anchor="middle" font-family="Georgia, serif" font-size="42" font-weight="700" fill="#fff">MS</text>
+  <text x="75" y="96" text-anchor="middle" font-family="Georgia, serif" font-size="42" font-weight="700" fill="#1496b0" opacity=".35">MS</text>
+</svg>
