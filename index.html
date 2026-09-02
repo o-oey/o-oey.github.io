@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Maldives Sales — Your journey, our passion</title>
-  <meta name="description" content="Maldives Sales curates resorts, private islands and local stays across 20 atolls.">
   <link rel="icon" href="/assets/logo-official.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/app.css">
   <link rel="stylesheet" href="/css/landing.css">
+  <link rel="stylesheet" href="/css/webgl.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="landing">
   <a class="skip" href="#main">Skip to content</a>
@@ -29,7 +29,7 @@
               <p class="kicker">Your journey, our passion</p>
             </div>
             <h1>Descend into the atolls.</h1>
-            <p class="lede">A living catalogue of private islands, overwater villas and inhabited reefs — searched, compared and booked by a desk that flies the same route you do.</p>
+            <p class="lede">Private islands, overwater villas and inhabited reefs — booked by a desk that flies the same route you do.</p>
             <div class="hero-row">
               <a class="btn btn-primary" href="/explorer.html">Browse 1,300+ stays</a>
               <a class="btn btn-ghost" href="/concierge.html" style="color:#fff;border-color:rgba(255,255,255,.35)">Talk to concierge</a>
@@ -45,22 +45,15 @@
       <div class="orbit-sticky">
         <div class="orbit-bg"></div>
         <div class="orbit-ring" id="orbitRing"></div>
-        <div class="orbit-copy">
-          <p class="kicker">20 atolls · 326 islands</p>
-          <h2>A ring of lagoons<br>you can actually book.</h2>
-        </div>
+        <div class="orbit-copy"><p class="kicker">20 atolls · 326 islands</p><h2>A ring of lagoons<br>you can actually book.</h2></div>
       </div>
     </section>
     <section class="landing-section">
       <div class="wrap story-grid">
         <div class="reveal">
           <p class="kicker" style="color:var(--tide)">The official mark</p>
-          <h2 style="font-family:var(--serif);font-weight:360;font-size:clamp(2.2rem,4.6vw,3.8rem);letter-spacing:-.03em;line-height:1.05;margin:10px 0 16px">Maldives Sales is the name on the desk.</h2>
-          <p class="muted" style="max-width:48ch;font-size:17px;line-height:1.55">The circular MS crest is the official logo of the platform.</p>
-          <div class="hero-row" style="margin-top:22px">
-            <a class="btn btn-primary" href="/atolls.html">Open the atolls</a>
-            <a class="btn btn-ghost" href="/collections.html">Collections</a>
-          </div>
+          <h2 style="font-family:var(--serif);font-weight:360;font-size:clamp(2.2rem,4.6vw,3.8rem);letter-spacing:-.03em;margin:10px 0 16px">Maldives Sales is the name on the desk.</h2>
+          <a class="btn btn-primary" href="/atolls.html">Open the atolls</a>
         </div>
         <div class="story-visual reveal"><div class="story-plate" style="background-image:url('/assets/logo-official.svg');background-size:cover"></div></div>
       </div>
@@ -69,18 +62,6 @@
       <div class="wrap">
         <div class="section-head reveal"><div><p class="kicker" style="color:var(--tide)">Atolls</p><h2>Eight doors to start.</h2></div><a class="btn btn-ghost" href="/atolls.html">All twenty</a></div>
         <div class="grid grid-4" id="homeAtolls"></div>
-      </div>
-    </section>
-    <section class="landing-section dark">
-      <div class="wrap">
-        <div class="feature-band reveal" style="background:transparent;padding:0">
-          <p class="kicker">Why the desk exists</p>
-          <h2 style="font-family:var(--serif);font-weight:360;font-size:clamp(2rem,4vw,3.2rem);margin:10px 0 14px;max-width:18ch">Rates, transfers and a human who answers.</h2>
-          <div class="hero-row" style="margin-top:22px">
-            <a class="btn btn-gold" href="/collections.html">Open collections</a>
-            <a class="btn btn-ghost" href="/concierge.html" style="color:#fff;border-color:rgba(255,255,255,.3)">Write the desk</a>
-          </div>
-        </div>
       </div>
     </section>
     <section class="landing-section">
@@ -104,25 +85,13 @@
       }
     }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     MS.header('home'); MS.footer();
-    const ORBIT_PHOTOS = [
-      'https://images.unsplash.com/photo-1573843981267-be1999ff39cd?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1586500036706-41963de24d8b?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1559628233-100c798642d4?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=800&q=60',
-      'https://images.unsplash.com/photo-1540202404-a2f127c5b78b?auto=format&fit=crop&w=800&q=60'
-    ];
+    const ORBIT_PHOTOS = ['https://images.unsplash.com/photo-1573843981267-be1999ff39cd?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1586500036706-41963de24d8b?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1559628233-100c798642d4?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=800&q=60','https://images.unsplash.com/photo-1540202404-a2f127c5b78b?auto=format&fit=crop&w=800&q=60'];
     (async () => {
-      const [stats, atolls, ultra] = await Promise.all([
-        MS.api('/api/stats'), MS.api('/api/atolls'), MS.api('/api/properties?tier=Ultra%20Luxury&limit=6')
-      ]);
+      const [stats, atolls, ultra] = await Promise.all([MS.api('/api/stats'), MS.api('/api/atolls'), MS.api('/api/properties?tier=Ultra%20Luxury&limit=6')]);
       document.getElementById('heroStats').innerHTML = [[stats.properties,'Stays'],[stats.atolls,'Atolls'],[stats.islands,'Islands'],[stats.ultra,'Ultra villas']].map(([n,l]) => `<div class="hero-stat"><b>${n.toLocaleString()}</b><span>${l}</span></div>`).join('');
-      const featured = ['B','N','K','AA','Dh','S','Gn','L'];
-      const picked = atolls.filter(a => featured.includes(a.code));
-      document.getElementById('orbitRing').innerHTML = picked.map((a,i) => `<a class="orbit-card" href="/atoll.html?code=${a.code}"><img class="media" src="${ORBIT_PHOTOS[i%ORBIT_PHOTOS.length]}" alt=""><div class="cap"><span>${a.code}</span><b>${a.name}</b></div></a>`).join('');
-      document.getElementById('homeAtolls').innerHTML = picked.map((a,i) => `<a class="card atoll-card tilt-card reveal" href="/atoll.html?code=${a.code}"><div class="card-media" style="background-image:url('${ORBIT_PHOTOS[i%ORBIT_PHOTOS.length]}');background-size:cover"></div><div class="card-body"><p class="kicker">${a.code}</p><h3>${a.name}</h3><p class="meta">${a.highlight} · ${a.properties} stays</p></div></a>`).join('');
+      const picked = atolls.filter(a => ['B','N','K','AA','Dh','S','Gn','L'].includes(a.code));
+      document.getElementById('orbitRing').innerHTML = picked.map((a,i) => `<a class="orbit-card" href="/atoll.html?code=${a.code}"><img class="media" src="${ORBIT_PHOTOS[i%8]}" alt=""><div class="cap"><span>${a.code}</span><b>${a.name}</b></div></a>`).join('');
+      document.getElementById('homeAtolls').innerHTML = picked.map((a,i) => `<a class="card atoll-card tilt-card reveal" href="/atoll.html?code=${a.code}"><div class="card-media" style="background-image:url('${ORBIT_PHOTOS[i%8]}');background-size:cover"></div><div class="card-body"><p class="kicker">${a.code}</p><h3>${a.name}</h3><p class="meta">${a.highlight} · ${a.properties} stays</p></div></a>`).join('');
       document.getElementById('homeUltra').innerHTML = (ultra.items||[]).map(p => MS.card(p).replace('class="card"','class="card tilt-card reveal"')).join('');
       window.MSLanding?.bindTilt(); window.MSLanding?.refresh();
     })();
