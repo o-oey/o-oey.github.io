@@ -1,0 +1,278 @@
+/* Immersive landing — 3D motion + scroll theatre */
+
+body.landing {
+  background: #03141b;
+  overflow-x: hidden;
+}
+body.landing .ms-header {
+  position: fixed;
+  left: 0; right: 0;
+  background: transparent;
+  border-bottom-color: transparent;
+  transition: background .35s ease, border-color .35s ease, backdrop-filter .35s ease;
+}
+body.landing .ms-header.scrolled {
+  background: color-mix(in srgb, var(--ink) 72%, transparent);
+  backdrop-filter: blur(18px);
+  border-bottom-color: rgba(255,255,255,.08);
+}
+body.landing .ms-header.scrolled .ms-nav a,
+body.landing .ms-header.scrolled .ms-brand strong,
+body.landing .ms-header.scrolled .ms-brand span {
+  color: #e8f7fb;
+}
+body.landing .ms-nav a { color: rgba(255,255,255,.82); }
+body.landing .ms-nav a:hover,
+body.landing .ms-nav a.active { background: rgba(255,255,255,.12); color: #fff; }
+body.landing .ms-brand strong { color: #fff; }
+body.landing .ms-brand span { color: var(--lagoon-2); }
+body.landing .icon-btn {
+  background: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.2);
+  color: #fff;
+}
+
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0;
+  z-index: 80;
+  background: linear-gradient(90deg, var(--lagoon), var(--gold));
+  transform-origin: 0 50%;
+}
+
+.scene-hero {
+  position: relative;
+  height: 165vh;
+  perspective: 1400px;
+  color: #fff;
+}
+.scene-sticky {
+  position: sticky; top: 0;
+  height: 100svh;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+.scene-stage {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.layer {
+  position: absolute; inset: -8%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+.layer-sky {
+  background:
+    radial-gradient(1200px 520px at 70% 0%, rgba(126,220,235,.45), transparent 55%),
+    linear-gradient(180deg, #9ad8ea 0%, #4eb8ce 28%, #0c6a82 62%, #03141b 100%);
+  transform: translateZ(-240px) scale(1.22);
+}
+.layer-photo {
+  background-image:
+    linear-gradient(180deg, rgba(3,20,27,.15) 0%, rgba(3,20,27,.2) 55%, rgba(3,20,27,.92) 100%),
+    url('https://images.unsplash.com/photo-1573843981267-be1999ff39cd?auto=format&fit=crop&w=2000&q=70');
+  opacity: .72;
+  mix-blend-mode: multiply;
+  transform: translateZ(-120px) scale(1.14);
+}
+.layer-water {
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(46,196,201,.35), transparent 55%),
+    repeating-linear-gradient(90deg, transparent 0 40px, rgba(255,255,255,.04) 40px 42px);
+  transform: translateZ(-40px) scale(1.06);
+  animation: tide 18s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes tide {
+  0%, 100% { transform: translateZ(-40px) scale(1.06) translateX(0); }
+  50% { transform: translateZ(-40px) scale(1.08) translateX(-2%); }
+}
+
+.logo-coin {
+  position: absolute;
+  right: 8%;
+  top: 16%;
+  width: min(38vw, 420px);
+  height: min(38vw, 420px);
+  transform-style: preserve-3d;
+  animation: coin-float 7s ease-in-out infinite;
+  filter: drop-shadow(0 30px 50px rgba(0,0,0,.35));
+  pointer-events: none;
+}
+.logo-coin img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transform: translateZ(80px);
+  box-shadow:
+    0 0 0 6px rgba(255,255,255,.18),
+    0 0 0 14px rgba(46,196,201,.18);
+}
+.logo-coin::after {
+  content: "";
+  position: absolute; inset: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.28), transparent 42%);
+  transform: translateZ(90px);
+  pointer-events: none;
+}
+@keyframes coin-float {
+  0%, 100% { transform: translate3d(0,0,60px) rotateY(-12deg) rotateX(8deg); }
+  50% { transform: translate3d(12px,-18px,80px) rotateY(14deg) rotateX(-4deg); }
+}
+
+.hero-copy {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 4;
+  padding: 0 32px 56px;
+  max-width: 1240px;
+  margin: 0 auto;
+  transform: translateZ(40px);
+}
+.hero-copy .brand-lockup {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.hero-copy .brand-lockup img {
+  width: 72px; height: 72px; border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.35);
+}
+.hero-copy h1 {
+  font-family: var(--serif); font-weight: 340;
+  font-size: clamp(3.1rem, 8vw, 7.4rem);
+  line-height: .9; letter-spacing: -.045em;
+  max-width: 13ch;
+}
+.hero-copy .lede {
+  max-width: 44ch; font-size: 18px; color: rgba(255,255,255,.86);
+  margin: 18px 0 28px;
+}
+.scroll-cue {
+  position: absolute; left: 50%; bottom: 22px; z-index: 5;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+}
+.scroll-cue .wheel {
+  width: 22px; height: 34px; border: 1.5px solid rgba(255,255,255,.55);
+  border-radius: 12px; position: relative;
+}
+.scroll-cue .wheel::after {
+  content: ""; position: absolute; left: 50%; top: 6px;
+  width: 3px; height: 8px; margin-left: -1.5px; border-radius: 2px;
+  background: #fff;
+  animation: wheel 1.6s ease-in-out infinite;
+}
+@keyframes wheel {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+.orbit-block {
+  position: relative;
+  height: 180vh;
+  color: #fff;
+}
+.orbit-sticky {
+  position: sticky; top: 0;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  perspective: 1600px;
+}
+.orbit-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(800px 400px at 50% 40%, rgba(18,137,163,.35), transparent 60%),
+    #03141b;
+}
+.orbit-copy {
+  position: relative; z-index: 3; text-align: center; padding: 0 24px;
+}
+.orbit-copy h2 {
+  font-family: var(--serif); font-weight: 340;
+  font-size: clamp(2.4rem, 6vw, 5.4rem);
+  letter-spacing: -.03em; line-height: 1;
+}
+.orbit-ring {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  display: grid; place-items: center;
+  will-change: transform;
+}
+.orbit-card {
+  position: absolute;
+  width: min(240px, 62vw);
+  height: 300px;
+  border-radius: 22px;
+  overflow: hidden;
+  color: #fff;
+  background: #0c4452;
+  box-shadow: 0 24px 50px rgba(0,0,0,.35);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+.orbit-card img, .orbit-card .media {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.orbit-card .cap {
+  position: absolute; inset: auto 0 0;
+  padding: 16px;
+  background: linear-gradient(transparent, rgba(3,20,27,.88));
+}
+.orbit-card .cap b { display: block; font-size: 16px; }
+.orbit-card .cap span { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+
+.reveal { opacity: 0; transform: translateY(36px) rotateX(8deg); transform-origin: 50% 100%; }
+.reveal.in { opacity: 1; transform: none; transition: opacity .8s ease, transform .9s cubic-bezier(.2,.7,.2,1); }
+
+.landing-section { padding: 100px 0; background: var(--paper); color: var(--ink); }
+.landing-section.dark {
+  background: linear-gradient(180deg, #03141b, #06232c);
+  color: #e8f7fb;
+}
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform .15s ease-out, box-shadow .2s ease;
+  will-change: transform;
+}
+.tilt-card:hover { box-shadow: var(--shadow); }
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 40px;
+  align-items: center;
+}
+.story-visual {
+  position: relative;
+  min-height: 420px;
+  perspective: 1000px;
+}
+.story-plate {
+  position: absolute; inset: 20px 30px;
+  border-radius: 28px;
+  background-size: cover; background-position: center;
+  box-shadow: 0 30px 70px rgba(4,24,32,.28);
+  transform: rotateY(-16deg) rotateX(6deg);
+  animation: plate 12s ease-in-out infinite;
+}
+@keyframes plate {
+  0%, 100% { transform: rotateY(-16deg) rotateX(6deg) translateZ(0); }
+  50% { transform: rotateY(10deg) rotateX(-4deg) translateZ(24px); }
+}
+
+@media (max-width: 980px) {
+  .logo-coin { width: 46vw; height: 46vw; right: -4%; top: 10%; opacity: .9; }
+  .story-grid { grid-template-columns: 1fr; }
+  .story-visual { min-height: 280px; }
+  .orbit-card { width: 190px; height: 250px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-coin, .layer-water, .story-plate { animation: none; }
+  .reveal { opacity: 1; transform: none; }
+  html { scroll-behavior: auto; }
+}
