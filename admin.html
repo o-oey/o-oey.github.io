@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Partner desk — Maldives Sales</title>
+  <link rel="icon" href="/assets/logo-mark.svg">
+  <link rel="stylesheet" href="/css/app.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="ms-header" id="site-header"></header>
+  <main class="section" style="padding-top:28px">
+    <div class="wrap">
+      <p class="kicker" style="color:var(--tide)">Partner desk</p>
+      <h1 style="font-family:var(--serif);font-weight:360;font-size:clamp(2.2rem,5vw,3.6rem)">Inquiries</h1>
+      <p class="muted" style="margin:8px 0 24px">Saved in this browser until the Node API is live.</p>
+      <div id="list" class="grid" style="grid-template-columns:1fr;gap:12px"></div>
+    </div>
+  </main>
+  <footer class="ms-footer" id="site-footer"></footer>
+  <script src="/js/catalog.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    MS.header('concierge'); MS.footer();
+    const rows = MSCatalog.listInquiries();
+    const el = document.getElementById('list');
+    if (!rows.length) {
+      el.innerHTML = '<p class="muted">No inquiries yet. Send one from Concierge or a stay page.</p>';
+    } else {
+      el.innerHTML = rows.map((r) => `
+        <article class="card"><div class="card-body">
+          <p class="kicker">${r.status || 'new'} · ${r.source || 'desk'}</p>
+          <h3>${r.name || 'Guest'} — ${r.propertyName || 'General'}</h3>
+          <p class="meta">${r.email || ''} · ${r.dates || ''} · ${new Date(r.created_at).toLocaleString()}</p>
+          <p>${r.message || ''}</p>
+        </div></article>`).join('');
+    }
+  </script>
+</body>
+</html>
