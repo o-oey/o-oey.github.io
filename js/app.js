@@ -76,7 +76,7 @@ const MS = {
           <h4>Desk</h4>
           <p><a href="/concierge.html">Concierge</a></p>
           <p><a href="/admin.html">Partner desk</a></p>
-          <p><a href="/api/health">API health</a></p>
+          <p><a href="/status.html">Desk status</a></p>
         </div>
         <div>
           <h4>Deploy</h4>

@@ -1,1 +1,56 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stay — Maldives Sales</title><link rel="icon" href="/assets/logo-mark.svg"><link rel="stylesheet" href="/css/app.css"><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet"></head><body><header class="ms-header" id="site-header"></header><main class="wrap" id="page" style="padding:24px 0 64px"></main><footer class="ms-footer" id="site-footer"></footer><script src="/js/catalog.js"></script><script src="/js/app.js"></script><script>MS.header('explorer');MS.footer();const id=new URLSearchParams(location.search).get('id');MS.api('/api/properties/'+encodeURIComponent(id)).then(p=>{document.title=p.name+' — Maldives Sales';document.getElementById('page').innerHTML=`<p class="muted"><a href="/explorer.html">Stays</a> · ${p.atoll}</p><h1 style="font-family:var(--serif);font-weight:360;font-size:clamp(2rem,5vw,3.4rem);margin:12px 0">${p.name}</h1><p class="meta">${p.island||'Private island'} · ${p.tier} · ${p.transfer||''}</p><p class="price" style="font-size:36px;margin:12px 0">${MS.money(p.priceFrom)} <em>/ night</em></p><form class="book-panel form" id="lead" style="max-width:420px"><input type="hidden" name="propertyId" value="${p.id}"><input type="hidden" name="propertyName" value="${p.name}"><label>Name</label><input name="name" required><label>Email</label><input name="email" type="email" required><button class="btn btn-primary" type="submit">Request this stay</button><p id="ok" class="note" hidden></p></form>`;document.getElementById('lead').addEventListener('submit',async e=>{e.preventDefault();const body=Object.fromEntries(new FormData(e.target).entries());body.source='property';const data=await MS.post('/api/inquiries',body);const ok=document.getElementById('ok');ok.hidden=false;ok.textContent=data.message||data.error;});}).catch(()=>{document.getElementById('page').innerHTML='<p>Stay not found.</p>'});</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stay — Maldives Sales</title>
+  <link rel="icon" href="/assets/logo-mark.svg">
+  <link rel="stylesheet" href="/css/app.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="ms-header" id="site-header"></header>
+<main class="wrap" id="page" style="padding:24px 0 64px"></main>
+<footer class="ms-footer" id="site-footer"></footer>
+<script src="/js/catalog.js"></script>
+<script src="/js/app.js"></script>
+<script>
+MS.header('explorer'); MS.footer();
+const id = new URLSearchParams(location.search).get('id');
+MS.api('/api/properties/' + encodeURIComponent(id)).then((p) => {
+  document.title = p.name + ' — Maldives Sales';
+  document.getElementById('page').innerHTML = `
+    <p class="muted"><a href="/explorer.html">Stays</a> · <a href="/atoll.html?code=${p.atollCode}">${p.atoll}</a></p>
+    <div class="card-media" style="margin:16px 0 20px;border-radius:24px;overflow:hidden;aspect-ratio:16/8">
+      <img src="${MS.img(p.image)}" alt="${p.name}" onerror="this.src='${MS.fallback}'">
+      <span class="badge">${p.tier}</span>
+    </div>
+    <h1 style="font-family:var(--serif);font-weight:360;font-size:clamp(2rem,5vw,3.4rem);margin:12px 0">${p.name}</h1>
+    <p class="meta">${p.island || 'Private island'} · ${p.tier} · ${p.transfer || ''} · ${p.stars || ''}★ · guest ${p.guestScore || '—'}</p>
+    <p class="price" style="font-size:36px;margin:12px 0">${MS.money(p.priceFrom)} <em>/ night</em></p>
+    <form class="book-panel form" id="lead" style="max-width:420px;margin:24px 0">
+      <input type="hidden" name="propertyId" value="${p.id}">
+      <input type="hidden" name="propertyName" value="${p.name}">
+      <label>Name</label><input name="name" required>
+      <label>Email</label><input name="email" type="email" required>
+      <label>Dates</label><input name="dates">
+      <button class="btn btn-primary" type="submit">Request this stay</button>
+      <p id="ok" class="note" hidden></p>
+    </form>
+    <h2 style="font-family:var(--serif);margin:36px 0 16px">Same atoll</h2>
+    <div class="grid grid-3">${(p.similar||[]).map(MS.card).join('') || '<p class="muted">No neighbours in this cut.</p>'}</div>`;
+  document.getElementById('lead').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = Object.fromEntries(new FormData(e.target).entries());
+    body.source = 'property';
+    const data = await MS.post('/api/inquiries', body);
+    const ok = document.getElementById('ok');
+    ok.hidden = false;
+    ok.textContent = data.message || data.error;
+  });
+}).catch(() => {
+  document.getElementById('page').innerHTML = '<p>Stay not found.</p>';
+});
+</script>
+</body>
+</html>
