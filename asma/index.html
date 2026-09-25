@@ -22,6 +22,7 @@
       <button class="active" data-tab="synthesizer">Synthesizer</button>
       <button data-tab="matrix">99 Names</button>
       <button data-tab="temporal">Windows</button>
+      <button data-tab="journey">Journey</button>
       <button data-tab="journal">Journal</button>
     </nav>
     <div class="stats">
@@ -30,6 +31,7 @@
       <span id="savedCount">0 saved</span>
     </div>
   </header>
+
   <main class="app">
     <section data-view="synthesizer">
       <div class="hero">
@@ -53,6 +55,7 @@
         </div>
       </div>
     </section>
+
     <section class="hidden" data-view="matrix">
       <div class="hero">
         <h2>The 99 Divine Names</h2>
@@ -72,6 +75,7 @@
       </div>
       <div class="cards" id="nameGrid"></div>
     </section>
+
     <section class="hidden" data-view="temporal">
       <div class="hero">
         <h2>Temporal windows</h2>
@@ -79,6 +83,18 @@
       </div>
       <div id="windowList"></div>
     </section>
+
+    <section class="hidden" data-view="journey">
+      <div class="hero">
+        <div class="chip">99-name path</div>
+        <h2>Walk the Names as a journey</h2>
+        <p>Six stages through Mercy, Sustenance, Forgiveness, Protection, Knowledge and Power. Tap a name to open its dua. Recited names stay marked on this device.</p>
+        <div class="progress-bar" aria-hidden="true"><i id="journeyBar"></i></div>
+        <p class="meta" id="journeyMeta">0 / 99 names visited</p>
+      </div>
+      <div class="journey-list" id="journeyList"></div>
+    </section>
+
     <section class="hidden" data-view="journal">
       <div class="hero">
         <h2>Journal & tasbeeh</h2>
@@ -96,8 +112,12 @@
       <div id="journalList"></div>
     </section>
   </main>
+
   <div class="modal" id="modal"></div>
   <div class="toast" id="toast"></div>
+  <noscript>
+    <p style="padding:24px;color:#fbbf24">JavaScript is required for the Dua Engine.</p>
+  </noscript>
   <script src="./data.js"></script>
   <script src="./app.js"></script>
 </body>
