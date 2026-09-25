@@ -230,14 +230,6 @@ function renderMatrix() {
     </article>`).join('') || '<p class="meta">No names match that filter.</p>';
 }
 
-function markVisited(id) {
-  const n = Number(id);
-  if (!state.visited.includes(n)) {
-    state.visited.push(n);
-    localStorage.setItem('asma_journey_visited', JSON.stringify(state.visited));
-  }
-}
-
 function openModal(name) {
   markVisited(name.id);
   state.modal = name;
@@ -254,9 +246,9 @@ function openModal(name) {
       <p class="meta">Root: ${name.root}</p>
       <div class="saved">
         <div class="tag">Sample dua</div>
-        <div class="arabic">${name.sampleDuaArabic || ''}</div>
-        <p class="meta"><em>${name.sampleDuaTrans || ''}</em></p>
-        <p class="meta">${name.sampleDuaEng || ''}</p>
+        <div class="arabic">${name.sampleDuaArabic}</div>
+        <p class="meta"><em>${name.sampleDuaTrans}</em></p>
+        <p class="meta">${name.sampleDuaEng}</p>
       </div>
       <button class="primary" id="useName">Use in synthesizer</button>
     </div>`;
@@ -278,6 +270,14 @@ const JOURNEY_STAGES = [
   { id: 'knowledge', title: 'Stage 5 — Knowledge', blurb: 'Ask for light, guidance, and clear seeing.' },
   { id: 'power', title: 'Stage 6 — Power', blurb: 'Close with majesty, strength, and trust.' },
 ];
+
+function markVisited(id) {
+  const n = Number(id);
+  if (!state.visited.includes(n)) {
+    state.visited.push(n);
+    localStorage.setItem('asma_journey_visited', JSON.stringify(state.visited));
+  }
+}
 
 function renderJourney() {
   const list = $('#journeyList');
@@ -318,20 +318,43 @@ function renderWindows() {
     </article>`).join('');
 }
 
-function renderJournal() {
-  $('#journalList').innerHTML = state.saved.length
-    ? state.saved.map((d, i) => `
-      <article class="saved">
-        <div class="tag">${d.savedAt || ''} • ${d.timeRecommendation || ''}</div>
-        <div class="arabic">${d.arabicDua}</div>
-        <p class="meta">${d.englishTranslation}</p>
-        <button class="ghost" data-del="${i}">Remove</button>
-      </article>`).join('')
-    : '<p class="meta">No saved duas yet. Synthesize one and tap Save.</p>';
+const ZIKR_CYCLE = [
+  { ar: 'سُبْحَانَ اللَّهِ', en: 'SubhanAllah' },
+  { ar: 'الْحَمْدُ لِلَّهِ', en: 'Alhamdulillah' },
+  { ar: 'اللَّهُ أَكْبَرُ', en: 'Allahu Akbar' },
+];
+
+function currentZikr() {
+  const idx = state.tasbeeh === 0 ? 0 : (state.tasbeeh - 1) % ZIKR_CYCLE.length;
+  return ZIKR_CYCLE[idx];
+}
+
+function paintTasbeeh() {
   const tap = $('#tapTasbeeh');
   if (tap) tap.textContent = String(state.tasbeeh);
   const tgt = $('#tasbeehTarget');
   if (tgt) tgt.textContent = String(state.tasbeehTarget);
+  const z = currentZikr();
+  const ar = $('#zikrAr');
+  const en = $('#zikrEn');
+  if (ar) ar.textContent = z.ar;
+  if (en) en.textContent = z.en;
+}
+
+function renderJournal() {
+  const list = $('#journalList');
+  if (list) {
+    list.innerHTML = state.saved.length
+      ? state.saved.map((d, i) => `
+        <article class="saved">
+          <div class="tag">${d.savedAt || ''} • ${d.timeRecommendation || ''}</div>
+          <div class="arabic">${d.arabicDua}</div>
+          <p class="meta">${d.englishTranslation}</p>
+          <button class="ghost" data-del="${i}">Remove</button>
+        </article>`).join('')
+      : '<p class="meta">No saved duas yet. Synthesize one and tap Save.</p>';
+  }
+  paintTasbeeh();
 }
 
 async function safeJson(url) {
@@ -418,17 +441,18 @@ async function boot() {
     renderChrome();
   };
   const tap = $('#tapTasbeeh');
-  if (tap) tap.onclick = () => {
+  if (tap) tap.onclick = (e) => {
+    e.preventDefault();
     state.tasbeeh += 1;
     localStorage.setItem('asma_tasbeeh', String(state.tasbeeh));
     if (state.tasbeeh === state.tasbeehTarget) toast('Tasbeeh target reached');
-    renderJournal();
+    paintTasbeeh();
   };
   const reset = $('#resetTasbeeh');
   if (reset) reset.onclick = () => {
     state.tasbeeh = 0;
     localStorage.setItem('asma_tasbeeh', '0');
-    renderJournal();
+    paintTasbeeh();
   };
   setTab(tabFromHash());
 }
