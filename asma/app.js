@@ -17,6 +17,7 @@ const state = {
   dailyCount: 0,
   tasbeeh: 0,
   tasbeehTarget: 33,
+  visited: [],
 };
 
 const RULES = [
@@ -79,6 +80,8 @@ function generateDua(text, timeId) {
 
 function loadStorage() {
   try { state.saved = JSON.parse(localStorage.getItem('asma_saved_duas') || '[]'); } catch { state.saved = []; }
+  try { state.visited = JSON.parse(localStorage.getItem('asma_journey_visited') || '[]'); } catch { state.visited = []; }
+  try { state.tasbeeh = parseInt(localStorage.getItem('asma_tasbeeh') || '0', 10) || 0; } catch { state.tasbeeh = 0; }
   try {
     const raw = JSON.parse(localStorage.getItem('dua_engine_streak_data') || 'null');
     const today = todayStr();
@@ -108,12 +111,31 @@ function bumpDaily() {
 }
 
 function setTab(tab) {
+  const allowed = ['synthesizer','matrix','temporal','journey','journal'];
+  if (!allowed.includes(tab)) tab = 'synthesizer';
   state.tab = tab;
   $$('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   $$('[data-view]').forEach(v => v.classList.toggle('hidden', v.dataset.view !== tab));
+  const hashMap = { synthesizer: '', matrix: 'names', temporal: 'windows', journey: 'journey', journal: 'journal' };
+  const hash = hashMap[tab];
+  if (hash) {
+    if (location.hash !== '#' + hash) history.replaceState(null, '', '#' + hash);
+  } else if (location.hash && location.hash !== '#') {
+    history.replaceState(null, '', location.pathname);
+  }
   if (tab === 'matrix') renderMatrix();
   if (tab === 'temporal') renderWindows();
+  if (tab === 'journey') renderJourney();
   if (tab === 'journal') renderJournal();
+}
+
+function tabFromHash() {
+  const h = (location.hash || '').replace('#','').toLowerCase();
+  if (h === 'names' || h === 'matrix' || h === '99') return 'matrix';
+  if (h === 'windows' || h === 'temporal') return 'temporal';
+  if (h === 'journey') return 'journey';
+  if (h === 'journal') return 'journal';
+  return 'synthesizer';
 }
 
 function renderChrome() {
@@ -208,7 +230,16 @@ function renderMatrix() {
     </article>`).join('') || '<p class="meta">No names match that filter.</p>';
 }
 
+function markVisited(id) {
+  const n = Number(id);
+  if (!state.visited.includes(n)) {
+    state.visited.push(n);
+    localStorage.setItem('asma_journey_visited', JSON.stringify(state.visited));
+  }
+}
+
 function openModal(name) {
+  markVisited(name.id);
   state.modal = name;
   const box = $('#modal');
   box.classList.add('show');
@@ -223,9 +254,9 @@ function openModal(name) {
       <p class="meta">Root: ${name.root}</p>
       <div class="saved">
         <div class="tag">Sample dua</div>
-        <div class="arabic">${name.sampleDuaArabic}</div>
-        <p class="meta"><em>${name.sampleDuaTrans}</em></p>
-        <p class="meta">${name.sampleDuaEng}</p>
+        <div class="arabic">${name.sampleDuaArabic || ''}</div>
+        <p class="meta"><em>${name.sampleDuaTrans || ''}</em></p>
+        <p class="meta">${name.sampleDuaEng || ''}</p>
       </div>
       <button class="primary" id="useName">Use in synthesizer</button>
     </div>`;
@@ -237,6 +268,42 @@ function openModal(name) {
     $('#niyyah').value = state.input;
     setTab('synthesizer');
   };
+}
+
+const JOURNEY_STAGES = [
+  { id: 'mercy', title: 'Stage 1 — Mercy', blurb: 'Begin with Names of compassion and nearness.' },
+  { id: 'sustenance', title: 'Stage 2 — Sustenance', blurb: 'Ask through Names of provision and opening.' },
+  { id: 'forgiveness', title: 'Stage 3 — Forgiveness', blurb: 'Return through pardon, forbearance, and patience.' },
+  { id: 'protection', title: 'Stage 4 — Protection', blurb: 'Seek sanctuary, peace, and guardianship.' },
+  { id: 'knowledge', title: 'Stage 5 — Knowledge', blurb: 'Ask for light, guidance, and clear seeing.' },
+  { id: 'power', title: 'Stage 6 — Power', blurb: 'Close with majesty, strength, and trust.' },
+];
+
+function renderJourney() {
+  const list = $('#journeyList');
+  if (!list) return;
+  const total = state.names.length || 99;
+  const done = state.visited.filter(id => state.names.some(n => n.id === id)).length;
+  const bar = $('#journeyBar');
+  if (bar) bar.style.width = Math.round((done / total) * 100) + '%';
+  const meta = $('#journeyMeta');
+  if (meta) meta.textContent = `${done} / ${total} names visited`;
+  const catMap = {
+    Mercy: 'mercy', Sustenance: 'sustenance', Forgiveness: 'forgiveness',
+    Protection: 'protection', Knowledge: 'knowledge', Power: 'power',
+  };
+  list.innerHTML = JOURNEY_STAGES.map(stage => {
+    const names = state.names.filter(n => catMap[n.category] === stage.id);
+    const stageDone = names.filter(n => state.visited.includes(n.id)).length;
+    return `<article class="journey-stage">
+      <div class="tag">${stageDone}/${names.length} recited</div>
+      <h3>${stage.title}</h3>
+      <p class="meta">${stage.blurb}</p>
+      <div class="journey-pills">
+        ${names.map(n => `<button data-jid="${n.id}" class="${state.visited.includes(n.id) ? 'done' : ''}">${n.id}. ${n.transliteration}</button>`).join('')}
+      </div>
+    </article>`;
+  }).join('');
 }
 
 function renderWindows() {
@@ -267,14 +334,28 @@ function renderJournal() {
   if (tgt) tgt.textContent = String(state.tasbeehTarget);
 }
 
+async function safeJson(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(url + ' ' + r.status);
+  return r.json();
+}
+
 async function loadEngineData() {
+  if (window.ENGINE_DATA?.names?.length >= 99) {
+    return window.ENGINE_DATA;
+  }
+  try {
+    const [names, windows, presets] = await Promise.all([
+      safeJson('./data/names.json'),
+      safeJson('./data/windows.json'),
+      safeJson('./data/presets.json'),
+    ]);
+    if (names?.length) return { names, windows, presets };
+  } catch (err) {
+    console.warn('JSON pack missing, trying ENGINE_DATA', err);
+  }
   if (window.ENGINE_DATA?.names?.length) return window.ENGINE_DATA;
-  const [names, windows, presets] = await Promise.all([
-    fetch('./data/names.json').then(r => r.json()),
-    fetch('./data/windows.json').then(r => r.json()),
-    fetch('./data/presets.json').then(r => r.json()),
-  ]);
-  return { names, windows, presets };
+  throw new Error('Names data missing');
 }
 
 async function boot() {
@@ -283,10 +364,21 @@ async function boot() {
   state.windows = data.windows || [];
   state.presets = data.presets || [];
   if (!state.names.length) throw new Error('Names data missing');
+
   loadStorage();
   renderChrome();
   renderSynthesizer();
+
   $$('nav.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+  window.addEventListener('hashchange', () => setTab(tabFromHash()));
+  const journeyList = $('#journeyList');
+  if (journeyList) journeyList.onclick = (e) => {
+    const btn = e.target.closest('[data-jid]');
+    if (!btn) return;
+    const name = state.names.find(n => String(n.id) === btn.dataset.jid);
+    if (name) openModal(name);
+    renderJourney();
+  };
   const niyyah = $('#niyyah');
   if (niyyah) niyyah.oninput = (e) => { state.input = e.target.value; };
   const synthBtn = $('#synthBtn');
@@ -328,11 +420,17 @@ async function boot() {
   const tap = $('#tapTasbeeh');
   if (tap) tap.onclick = () => {
     state.tasbeeh += 1;
+    localStorage.setItem('asma_tasbeeh', String(state.tasbeeh));
     if (state.tasbeeh === state.tasbeehTarget) toast('Tasbeeh target reached');
     renderJournal();
   };
   const reset = $('#resetTasbeeh');
-  if (reset) reset.onclick = () => { state.tasbeeh = 0; renderJournal(); };
+  if (reset) reset.onclick = () => {
+    state.tasbeeh = 0;
+    localStorage.setItem('asma_tasbeeh', '0');
+    renderJournal();
+  };
+  setTab(tabFromHash());
 }
 
 function start() {
@@ -347,5 +445,8 @@ function start() {
   });
 }
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-else start();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', start);
+} else {
+  start();
+}
