@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asma ul-Husna & Temporal Dua Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="pulse"></div>
+      <div>
+        <h1>Asma ul-Husna Engine</h1>
+        <p>3-3-3 Sonomy Temporal Matrix v2.6</p>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Main">
+      <button class="active" data-tab="synthesizer">Synthesizer</button>
+      <button data-tab="matrix">99 Names</button>
+      <button data-tab="temporal">Windows</button>
+      <button data-tab="journal">Journal</button>
+    </nav>
+    <div class="stats">
+      <span id="streak">Streak 1d</span>
+      <span id="daily">0/5 today</span>
+      <span id="savedCount">0 saved</span>
+    </div>
+  </header>
+  <main class="app">
+    <section data-view="synthesizer">
+      <div class="hero">
+        <div class="chip">Event-centric supplication engine</div>
+        <h2>Recite the <em>right Divine Name</em> for the right cause</h2>
+        <p>Maps your intention (niyyah), need (sabab), and time (waqt) onto the 99 Names and a 5-stage prophetic dua. Offline matrix — no API key required.</p>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <div class="label">Quick cause presets</div>
+          <div class="presets" id="presets"></div>
+          <div class="label" style="margin-top:16px">Express your need or goal</div>
+          <textarea id="niyyah" placeholder="e.g. I am anxious about an upcoming exam and need clarity and focus..."></textarea>
+          <div class="label" style="margin-top:16px">Temporal window</div>
+          <div class="times" id="times"></div>
+          <button class="primary" id="synthBtn">Synthesize prophetic dua</button>
+        </div>
+        <div id="duaOut" class="empty">
+          <h3>Awaiting input</h3>
+          <p class="meta">Choose a preset or type your situation, pick a time window, then synthesize.</p>
+        </div>
+      </div>
+    </section>
+    <section class="hidden" data-view="matrix">
+      <div class="hero">
+        <h2>The 99 Divine Names</h2>
+        <p>Search by name, meaning, or root. Open any card for a sample tawassul dua.</p>
+      </div>
+      <div class="filters">
+        <select id="nameCat" class="filter" aria-label="Category">
+          <option value="All">All categories</option>
+          <option value="Mercy">Mercy</option>
+          <option value="Sustenance">Sustenance</option>
+          <option value="Forgiveness">Forgiveness</option>
+          <option value="Protection">Protection</option>
+          <option value="Knowledge">Knowledge</option>
+          <option value="Power">Power</option>
+        </select>
+        <input id="nameSearch" class="search" placeholder="Search name, meaning, root..." />
+      </div>
+      <div class="cards" id="nameGrid"></div>
+    </section>
+    <section class="hidden" data-view="temporal">
+      <div class="hero">
+        <h2>Temporal windows</h2>
+        <p>Times and states the tradition associates with accepted dua.</p>
+      </div>
+      <div id="windowList"></div>
+    </section>
+    <section class="hidden" data-view="journal">
+      <div class="hero">
+        <h2>Journal & tasbeeh</h2>
+        <p>Saved duas stay in this browser. Tap the circle for dhikr.</p>
+      </div>
+      <div class="panel">
+        <div class="label">Tasbeeh — SubhanAllah / Alhamdulillah / Allahu Akbar</div>
+        <div class="counter">
+          <button class="ghost" id="resetTasbeeh">Reset</button>
+          <button class="big" id="tapTasbeeh" aria-label="Increment tasbeeh">0</button>
+          <div class="meta">Target <span id="tasbeehTarget">33</span></div>
+        </div>
+        <div id="tasbeehVal" class="hidden">0</div>
+      </div>
+      <div id="journalList"></div>
+    </section>
+  </main>
+  <div class="modal" id="modal"></div>
+  <div class="toast" id="toast"></div>
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
